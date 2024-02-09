@@ -14,6 +14,7 @@ guess = (input("Guess the 6 letter word: ")).lower()
 
 while (tries_left > 0):
     if guess == random_word:
+        print(f"{Fore.GREEN}{Back.LIGHTGREEN_EX}{guess}{Fore.RESET}{Back.RESET}", end=" ")
         print("You Win")
         break
     
@@ -22,22 +23,12 @@ while (tries_left > 0):
             print("Invalid Guess. Try Again")
             continue
         if guess[letter] == random_word[letter]:
-            guess_answer[letter] = random_word[letter]
+            print(f"{Fore.GREEN}{Back.LIGHTGREEN_EX}{guess[letter]}{Fore.RESET}{Back.RESET}", end=" ")
             
-        if guess[letter] != random_word[letter] and guess[letter] in random_word:
-            incorrect_letter_position.append(guess[letter])
-    
-    print("Incorrect Letter Positions: ", end="")
-    for display_incorrect_position in incorrect_letter_position:
-        print(f"{Fore.YELLOW}{display_incorrect_position}{Fore.WHITE}", end=" ")
-    incorrect_letter_position.clear()
-    
-    print("\nGuess Result: ", end="")
-    for display_correct_guess in guess_answer:
-        if (display_correct_guess == '_'):
-            print(f"{Fore.RED}{display_correct_guess}{Fore.WHITE}", end=" ")
-        else:
-            print(f"{Fore.GREEN}{display_correct_guess}{Fore.WHITE}", end=" ")
+        elif guess[letter] != random_word[letter] and guess[letter] in random_word:
+            print(f"{Fore.YELLOW}{Back.LIGHTYELLOW_EX}{guess[letter]}{Fore.RESET}{Back.RESET}", end=" ")
+        else: 
+            print(f"{Fore.RED}{Back.LIGHTRED_EX}{guess[letter]}{Fore.RESET}{Back.RESET}", end=" ")
             
     print()
     print("Try Again")
