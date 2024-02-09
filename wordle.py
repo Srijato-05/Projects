@@ -1,72 +1,59 @@
-# Importing the 'random' module to enable the selection of a random word from a list
 import random
-# Importing colorama to add colored output in terminal; 'init' is called to enable colorama in Windows
-from colorama import Fore, Back, Style, init
-init(autoreset=True)  # Ensures that each print statement only temporarily changes the text style
+from collections import Counter
+from colorama import Fore, Back, Style
 
-# List of potential words to be guessed in the game
-words = ["aceola", "aprium", "banana", "babaco", "cherry", "durian", "feijoa", "lemons", "nutmeg", "orange", "papaya", "tomato"]
-# Randomly selecting a word from the list to be the answer
-random_word = random.choice(words)
+def generate_feedback(guess, random_word):
+    # Count the occurrences of each letter in the random_word
+    word_letter_count = Counter(random_word)
 
-# Displaying the game's introduction and instructions
-print("WORDLE GAME\nYou have 5 tries to guess the 6 letter word. Good Luck!")
-# Initializing the number of tries the player has
-tries_left = 5
-# For debugging purposes, printing the selected word (you would normally comment this out)
-print(random_word)
+    # Create a list to hold the feedback for each letter
+    feedback = []
 
-# Starting the game loop, which continues as long as the player has tries left
-while tries_left > 0:
-    # Prompting the player for their guess
-    guess = input("Guess the 6 letter word: ").lower()
-
-    # Checking if the entered guess is the correct length
-    if len(guess) != len(random_word):
-        # Informing the player their guess was the wrong length and prompting them to try again
-        print("Invalid Guess. Try Again")
-        # Reducing the number of tries left
-        tries_left -= 1
-        # Showing the player how many tries they have left
-        print("Tries left: ", tries_left)
-        # If the player runs out of tries, the game ends and reveals the correct word
-        if tries_left == 0:
-            print("You Lose")
-            print("The word was: ", random_word)
-        # Skipping the rest of the loop to ask for a new guess
-        continue
-
-    # Checking if the player's guess is correct
-    if guess == random_word:
-        # Congratulating the player for guessing correctly with green colored text
-        print(f"{Fore.GREEN}{Back.LIGHTGREEN_EX}{guess}{Fore.RESET}{Back.RESET}\nYou Win!")
-        # Breaking out of the loop as the player has won
-        break
-
-    # Initializing a string to provide feedback on the player's guess
-    feedback = ""
-    # Iterating over each letter in the player's guess
-    for letter in range(len(guess)):
-        # If the letter is in the correct position, it's added to the feedback string in green
-        if guess[letter] == random_word[letter]:
-            feedback += f"{Fore.GREEN}{Back.LIGHTGREEN_EX}{guess[letter]}{Fore.RESET}{Back.RESET}"
-        # If the letter is in the word but the wrong position, it's added in yellow
-        elif guess[letter] in random_word:
-            feedback += f"{Fore.YELLOW}{Back.LIGHTYELLOW_EX}{guess[letter]}{Fore.RESET}{Back.RESET}"
-        # If the letter is not in the word, it's added in red
+    # First pass: Check for correct letters (green)
+    for idx, letter in enumerate(guess):
+        if letter == random_word[idx]:
+            feedback.append(f"{Fore.GREEN}{Back.LIGHTGREEN_EX}{letter}{Style.RESET_ALL}")
+            word_letter_count[letter] -= 1
         else:
-            feedback += f"{Fore.RED}{Back.LIGHTRED_EX}{guess[letter]}{Fore.RESET}{Back.RESET}"
+            feedback.append(None)  # Placeholder for second pass
 
-    # Displaying the feedback for the player's guess
-    print(feedback)
-    
-    # If the guess is incorrect, reduce the number of tries and prompt to try again
-    if guess != random_word:
-        tries_left -= 1
-        print("Try Again")
-        print("Tries left: ", tries_left)
+    # Second pass: Check for misplaced letters (yellow) and incorrect letters (red)
+    for idx, letter in enumerate(guess):
+        if feedback[idx] is None:  # Only process letters that weren't marked green
+            if letter in random_word and word_letter_count[letter] > 0:
+                feedback[idx] = f"{Fore.YELLOW}{Back.LIGHTYELLOW_EX}{letter}{Style.RESET_ALL}"
+                word_letter_count[letter] -= 1
+            else:
+                feedback[idx] = f"{Fore.RED}{Back.LIGHTRED_EX}{letter}{Style.RESET_ALL}"
 
-    # If the player has no more tries left, the game ends and the correct word is revealed
-    if tries_left == 0:
-        print("You Lose")
-        print("The word was: ", random_word)
+    return ''.join(feedback)
+
+def wordle_game(word_list, word_length=6, max_tries=5):
+    # Randomly choose a word from the word_list
+    random_word = random.choice([word for word in word_list if len(word) == word_length]).lower()
+    print(random_word)
+    print("WORDLE GAME")
+    print(f"You have {max_tries} tries to guess the {word_length} letter word. Good Luck!")
+
+    tries = 0
+    while tries < max_tries:
+        guess = input(f"Guess the {word_length} letter word: ").lower().strip()
+
+        if len(guess) != word_length:
+            print(f"Please enter a {word_length} letter word.")
+            continue
+
+        if guess == random_word:
+            print(f"Congratulations! You've guessed the word: {random_word.upper()}")
+            return
+
+        feedback = generate_feedback(guess, random_word)
+        print(feedback)
+        tries += 1
+        print(f"Try Again\nTries left: {max_tries - tries}")
+
+    print(f"Sorry, you've run out of tries. The word was: {random_word.upper()}.")
+
+# Example usage with a predefined list of 6-letter words
+word_list = ["banana", "cherry", "durian", "lemons", "nutmeg", "orange", "papaya", "tomato"]
+wordle_game(word_list)
