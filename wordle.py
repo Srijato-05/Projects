@@ -1,3 +1,4 @@
+# Simple Wordle Game by Srijato Das
 import random
 from collections import Counter
 from colorama import Fore, Back, Style
